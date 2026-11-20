@@ -32,12 +32,10 @@ TOPIC_NAMES = {
 def detect_district(question):
     q = question.lower()
 
-    # Check longer district names first
     for district in sorted(DISTRICTS, key=len, reverse=True):
         if district.lower() in q:
             return district
 
-    # Ramanagara is also known as Bengaluru South district
     if "ramanagara" in q:
         return "Bengaluru South"
 
@@ -54,13 +52,13 @@ def detect_topic(question):
 
     if any(word in q for word in [
         "geography", "river", "mountain", "soil", "climate",
-        natural resource", "resources"
+        "natural resource", "resources"
     ]):
         return "geography"
 
     if any(word in q for word in [
         "culture", "tourism", "tourist", "festival",
-        temple", "food", "tradition"
+        "temple", "food", "tradition"
     ]):
         return "culture"
 
@@ -95,8 +93,9 @@ def parse_district_sections(content):
         if not line:
             continue
 
-        # Identify district heading
-        cleaned = re.sub(r"^DISTRICT\s*:\s*", "", line, flags=re.I)
+        cleaned = re.sub(
+            r"^DISTRICT\s*:\s*", "", line, flags=re.IGNORECASE
+            )
         cleaned = cleaned.rstrip(":").strip()
 
         matched_district = None
@@ -111,7 +110,6 @@ def parse_district_sections(content):
             sections[current_district] = []
             continue
 
-        # Collect numbered points
         if current_district:
             point_match = re.match(
                 r"^\s*(?:\d+[\.\)]|[-*])\s*(.+)$", line
@@ -140,8 +138,7 @@ def retrieve(database, district, topic):
     if topic not in database:
         return []
 
-    district_data = database[topic].get(district, [])
-    return district_data
+    return database[topic].get(district, [])
 
 
 def get_answer(question):
@@ -150,7 +147,7 @@ def get_answer(question):
 
     if not district:
         return (
-            "Please mention a Karnataka district name in your question. "
+            "Please mention a Karnataka district name. "
             "Example: Explain Dharwad history."
         )
 
@@ -165,8 +162,8 @@ def get_answer(question):
 
     if not points:
         return (
-            f"Information Missing: I could not find {topic} information "
-            f"for {district} in the document."
+            f"Information Missing: No {topic} information "
+            f"found for {district} in the document."
         )
 
     answer = f"DISTRICT: {district}\n"
