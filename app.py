@@ -1,5 +1,6 @@
 
 import streamlit as st
+from rag_engine import get_answer
 
 st.set_page_config(
     page_title="Karnataka AI Chatbot",
@@ -11,30 +12,53 @@ st.title("🌿 Karnataka AI Chatbot")
 st.subheader("Your Karnataka Knowledge Assistant")
 
 st.write(
-    "Ask me about Karnataka's history, geography, "
-    "culture, tourism, and economy."
+    "Explore Karnataka through four topics: History, Geography, "
+    "Culture & Tourism, and Economy & Development."
 )
 
 # Four main topics
 topics = [
-    "History & Heritage",
-    "Geography & Natural Resources",
-    "Culture & Tourism",
-    "Economy & Development"
+    "🏛️ History & Heritage",
+    "🌍 Geography & Natural Resources",
+    "🎭 Culture & Tourism",
+    "💼 Economy & Development"
 ]
 
-st.markdown("### Explore Karnataka")
+st.markdown("### Explore Topics")
 
-for topic in topics:
-    st.info(topic)
+cols = st.columns(4)
 
-# Chat input
+for i, topic in enumerate(topics):
+    with cols[i]:
+        st.info(topic)
+
+st.divider()
+
+# Initialize chat history
+if "messages" not in st.session_state:
+    st.session_state.messages = []
+
+# Display previous messages
+for message in st.session_state.messages:
+    with st.chat_message(message["role"]):
+        st.write(message["content"])
+
+# User question
 question = st.chat_input("Ask anything about Karnataka...")
 
 if question:
-    st.chat_message("user").write(question)
-
-    st.chat_message("assistant").write(
-        "Welcome! Your Karnataka chatbot is being developed. "
-        "We will add detailed knowledge about Karnataka in the next steps."
+    st.session_state.messages.append(
+        {"role": "user", "content": question}
     )
+
+    with st.chat_message("user"):
+        st.write(question)
+
+    answer = get_answer(question)
+
+    st.session_state.messages.append(
+        {"role": "assistant", "content": answer}
+    )
+
+    with st.chat_message("assistant"):
+        st.write(answer)
