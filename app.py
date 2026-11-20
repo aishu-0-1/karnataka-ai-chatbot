@@ -9,39 +9,41 @@ st.set_page_config(
     layout="wide"
 )
 
-# ---------------- CUSTOM DESIGN ----------------
+# ---------------- DESIGN ----------------
 st.markdown("""
 <style>
 .stApp {
     background: linear-gradient(135deg, #f8efff, #f0e6ff, #e7f4ff);
 }
 [data-testid="stSidebar"] {
-    background: linear-gradient(180deg, #301052, #673ab7, #8b5bd6);
+    background: linear-gradient(180deg, #38145c, #7541b8, #a56ae0);
 }
 [data-testid="stSidebar"] * {
     color: white !important;
 }
-.main-title {
-    font-size: 42px;
+.title {
+    font-size: 40px;
     font-weight: 800;
-    background: linear-gradient(90deg, #7628c9, #e044a7, #347eea);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+    color: #823ec4;
 }
-.subtitle {
-    color: #65458c;
-    font-size: 17px;
-}
-.topic-card {
+.card {
     background: white;
-    padding: 20px;
+    padding: 22px;
     border-radius: 18px;
     border: 1px solid #e5d5fa;
-    box-shadow: 0px 4px 15px rgba(120, 70, 170, 0.12);
-    margin-bottom: 12px;
+    box-shadow: 0 4px 15px rgba(120,70,170,0.12);
+    margin-bottom: 15px;
 }
 </style>
 """, unsafe_allow_html=True)
+
+# ---------------- TEAM MEMBERS ----------------
+team_members = [
+    "Jyothi",
+    "Aishwarya",
+    "Chaithra B H",
+    "Madava"
+]
 
 # ---------------- SIDEBAR ----------------
 with st.sidebar:
@@ -54,62 +56,47 @@ with st.sidebar:
         [
             "🏠 Home / Chat",
             "⚙️ Project Pipeline",
-            "ℹ️ About Project",
-            "📚 Topics",
-            "👥 Team Members"
+            "ℹ️ Project Info"
         ]
     )
 
     st.markdown("---")
-    st.markdown("### 🏛️ Project Information")
-    st.write("📍 Karnataka, India")
-    st.write("🗺️ 31 Districts")
-    st.write("📖 4 Knowledge Topics")
+    st.caption("🗺️ 31 Districts")
+    st.caption("📚 4 Knowledge Topics")
 
     if st.button("🗑️ Clear Chat"):
         st.session_state.messages = []
         st.rerun()
 
-    st.markdown("---")
-    st.caption("Made with Python & Streamlit 💜")
-
 # ---------------- HOME / CHAT ----------------
 if page == "🏠 Home / Chat":
 
     st.markdown(
-        '<div class="main-title">💜 Karnataka AI Chatbot</div>',
+        '<div class="title">💜 Karnataka AI Chatbot</div>',
         unsafe_allow_html=True
     )
 
-    st.markdown(
-        '<div class="subtitle">Explore Karnataka district information with AI</div>',
-        unsafe_allow_html=True
-    )
-
-    st.write("")
+    st.write("### Your Karnataka District Information Assistant")
 
     st.markdown("""
-    <div class="topic-card">
-    👋 Welcome! Ask me about any district of Karnataka.
-    <br><br>
-    Explore history, geography, culture, tourism, economy and development.
+    <div class="card">
+    👋 Welcome to Karnataka AI Chatbot!<br><br>
+    Ask questions about Karnataka districts, history, geography,
+    culture, tourism, economy and development.
     </div>
     """, unsafe_allow_html=True)
 
-    # Initialize chat history
     if "messages" not in st.session_state:
         st.session_state.messages = []
 
-    # Display previous chat
+    # Display chat history
     for message in st.session_state.messages:
         with st.chat_message(message["role"]):
             st.markdown(message["content"])
 
-    # Chat input
     question = st.chat_input("Ask about any Karnataka district...")
 
     if question:
-        # Display and store user message
         st.session_state.messages.append(
             {"role": "user", "content": question}
         )
@@ -117,21 +104,16 @@ if page == "🏠 Home / Chat":
         with st.chat_message("user"):
             st.markdown(question)
 
-        # Get chatbot answer
         with st.chat_message("assistant"):
-            with st.spinner("Finding district information..."):
+            with st.spinner("Searching district information..."):
                 try:
                     answer = get_answer(question)
                 except Exception as e:
-                    answer = (
-                        "Sorry, an error occurred while finding the answer. "
-                        "Please try again."
-                    )
+                    answer = "Sorry, an error occurred."
                     st.error(str(e))
 
             st.markdown(answer)
 
-        # Store assistant message
         st.session_state.messages.append(
             {"role": "assistant", "content": answer}
         )
@@ -139,169 +121,118 @@ if page == "🏠 Home / Chat":
 # ---------------- PROJECT PIPELINE ----------------
 elif page == "⚙️ Project Pipeline":
 
-    st.markdown('<div class="main-title">⚙️ Project Pipeline</div>',
-                unsafe_allow_html=True)
+    st.markdown(
+        '<div class="title">⚙️ Project Pipeline</div>',
+        unsafe_allow_html=True
+    )
 
-    st.write("### 🔄 How the Karnataka AI Chatbot Works")
+    st.markdown("""
+    <div class="card">
+    <h3>About the Project Workflow</h3>
+    Karnataka AI Chatbot uses district-based information retrieval
+    to answer questions about Karnataka.
+    </div>
+    """, unsafe_allow_html=True)
 
     pipeline = [
-        ("📥 1. Data Collection",
-         "Collect information about Karnataka districts and their topics."),
-        ("📄 2. Document Storage",
-         "Store the information in organized text files."),
-        ("✂️ 3. Text Processing",
-         "Read and organize the district information from documents."),
-        ("📍 4. District Detection",
-         "Identify which district the user mentioned in the question."),
-        ("📚 5. Topic Detection",
-         "Identify History, Geography, Culture or Economy."),
-        ("🔎 6. Information Retrieval",
-         "Retrieve information for the selected district and topic."),
-        ("🤖 7. Answer Generation",
-         "Generate a clear answer using the retrieved information."),
-        ("💬 8. User Response",
-         "Display the answer in the chatbot.")
+        ("📥 Step 1 — Data Collection",
+         "Collect information about Karnataka and its 31 districts."),
+        ("📂 Step 2 — Knowledge Base",
+         "Organize information into four topic text files."),
+        ("📖 Step 3 — Text Processing",
+         "Read and organize the stored district information."),
+        ("📍 Step 4 — District Detection",
+         "Identify the district name in the user's question."),
+        ("📚 Step 5 — Topic Detection",
+         "Identify the requested topic such as History or Geography."),
+        ("🔎 Step 6 — Information Retrieval",
+         "Retrieve the information belonging to the selected district and topic."),
+        ("🤖 Step 7 — Answer Generation",
+         "Prepare a clear answer using the retrieved information."),
+        ("💬 Step 8 — Display Answer",
+         "Show the answer to the user through the chatbot interface.")
     ]
 
     for title, description in pipeline:
         st.markdown(f"""
-        <div class="topic-card">
+        <div class="card">
         <h4>{title}</h4>
         <p>{description}</p>
         </div>
         """, unsafe_allow_html=True)
 
-# ---------------- ABOUT PROJECT ----------------
-elif page == "ℹ️ About Project":
+# ---------------- PROJECT INFO ----------------
+elif page == "ℹ️ Project Info":
 
-    st.markdown('<div class="main-title">ℹ️ About Project</div>',
-                unsafe_allow_html=True)
+    st.markdown(
+        '<div class="title">ℹ️ Project Info</div>',
+        unsafe_allow_html=True
+    )
 
+    # ABOUT
     st.markdown("""
-    <div class="topic-card">
-    <h3>💜 Karnataka AI Chatbot</h3>
-    <p>
-    Karnataka AI Chatbot is an interactive information assistant
-    developed to provide district-specific information about Karnataka.
-    </p>
+    <div class="card">
+    <h2>💜 About the Project</h2>
+    Karnataka AI Chatbot is an interactive chatbot designed to provide
+    district-specific information about Karnataka. It helps users explore
+    the state's history, geography, culture, tourism, economy and development
+    through simple questions and answers.
     </div>
     """, unsafe_allow_html=True)
 
-    st.markdown("### 🎯 Project Objectives")
-
+    # OBJECTIVES
     st.markdown("""
-    - Provide information about Karnataka districts.
-    - Help users explore Karnataka's history and heritage.
-    - Provide geographical and natural resource information.
-    - Explore culture, festivals and tourism.
-    - Understand economy and development.
-    - Deliver simple and organized answers.
-    """)
+    <div class="card">
+    <h3>🎯 Project Objectives</h3>
+    <ul>
+    <li>Provide information about Karnataka's 31 districts.</li>
+    <li>Organize district knowledge into different topics.</li>
+    <li>Retrieve relevant information based on user questions.</li>
+    <li>Make regional information easy to understand and explore.</li>
+    </ul>
+    </div>
+    """, unsafe_allow_html=True)
 
-    st.markdown("### 🛠️ Technologies Used")
-
-    col1, col2 = st.columns(2)
-
-    with col1:
-        st.markdown("""
-        <div class="topic-card">
-        <h4>🐍 Python</h4>
-        Chatbot programming language
-        </div>
-        """, unsafe_allow_html=True)
-
-        st.markdown("""
-        <div class="topic-card">
-        <h4>📄 Text Files</h4>
-        District information storage
-        </div>
-        """, unsafe_allow_html=True)
-
-    with col2:
-        st.markdown("""
-        <div class="topic-card">
-        <h4>🌐 Streamlit</h4>
-        Web application interface
-        </div>
-        """, unsafe_allow_html=True)
-
-        st.markdown("""
-        <div class="topic-card">
-        <h4>🔎 Retrieval System</h4>
-        District and topic-based information retrieval
-        </div>
-        """, unsafe_allow_html=True)
-
-    st.markdown("### 🌍 Project Scope")
-    st.write("31 Karnataka districts • 4 topics • District-based question answering")
-
-# ---------------- TOPICS ----------------
-elif page == "📚 Topics":
-
-    st.markdown('<div class="main-title">📚 Knowledge Topics</div>',
-                unsafe_allow_html=True)
+    # TOPICS
+    st.markdown("## 📚 Topics")
 
     topics = [
-        (
-            "🏰 History & Heritage",
-            "Historical background, dynasties, monuments, forts and heritage."
-        ),
-        (
-            "🌍 Geography & Natural Resources",
-            "Location, rivers, climate, landscape, soil and natural resources."
-        ),
-        (
-            "🎭 Culture & Tourism",
-            "Festivals, traditions, tourist attractions, temples and local food."
-        ),
-        (
-            "🏭 Economy & Development",
-            "Agriculture, industries, business, employment and development."
-        )
+        ("🏰 History & Heritage",
+         "Dynasties, historical places, forts and heritage."),
+        ("🌍 Geography & Natural Resources",
+         "Rivers, climate, landscapes, soil and natural resources."),
+        ("🎭 Culture & Tourism",
+         "Festivals, traditions, tourist attractions and local food."),
+        ("🏭 Economy & Development",
+         "Agriculture, industries, business and regional development.")
     ]
 
     for title, description in topics:
         st.markdown(f"""
-        <div class="topic-card">
-        <h3>{title}</h3>
+        <div class="card">
+        <h4>{title}</h4>
         <p>{description}</p>
         </div>
         """, unsafe_allow_html=True)
 
-    st.markdown("### 🗺️ District Coverage")
-    st.write("The chatbot is designed to cover all 31 districts of Karnataka.")
+    # TEAM
+    st.markdown("## 👥 Team Members")
 
-# ---------------- TEAM MEMBERS ----------------
-elif page == "👥 Team Members":
+    cols = st.columns(2)
 
-    st.markdown('<div class="main-title">👥 Team Members</div>',
-                unsafe_allow_html=True)
+    for i, member in enumerate(team_members):
+        with cols[i % 2]:
+            st.markdown(f"""
+            <div class="card">
+            <h3>👤 {member}</h3>
+            <p>Karnataka AI Chatbot Project Team</p>
+            </div>
+            """, unsafe_allow_html=True)
 
     st.markdown("""
-    <div class="topic-card">
-    <h3>💜 Project Team</h3>
-    <p>Karnataka AI Chatbot</p>
-    <p>Computer Science and Engineering</p>
-    <p>Shridevi Institute of Engineering and Technology</p>
+    <div class="card">
+    <h4>🎓 Department</h4>
+    Computer Science and Engineering<br>
+    Shridevi Institute of Engineering and Technology
     </div>
     """, unsafe_allow_html=True)
-
-    # Replace these placeholders with your actual team names
-    team_members = [
-        "Team Member 1",
-        "Team Member 2",
-        "Team Member 3",
-        "Team Member 4"
-    ]
-
-    st.markdown("### 🧑‍💻 Team Members")
-
-    for i, member in enumerate(team_members, start=1):
-        st.markdown(f"""
-        <div class="topic-card">
-        <h4>👤 Member {i}</h4>
-        <p>{member}</p>
-        </div>
-        """, unsafe_allow_html=True)
-
-    st.info("Edit the team member names in the code to add your actual names.")
