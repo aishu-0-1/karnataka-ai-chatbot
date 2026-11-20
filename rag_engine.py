@@ -5,9 +5,9 @@ import re
 DATA_FOLDER = os.path.join(os.path.dirname(__file__), "data")
 
 
-# 1. Load knowledge files
+# 1. Load knowledge files with their topic names
 def load_documents():
-    documents = []
+    documents = {}
 
     if not os.path.exists(DATA_FOLDER):
         return documents
@@ -17,7 +17,8 @@ def load_documents():
 
         if file.endswith(".txt"):
             with open(path, "r", encoding="utf-8") as f:
-                documents.append(f.read())
+                topic = file.replace(".txt", "").lower()
+                documents[topic] = f.read()
 
     return documents
 
@@ -26,24 +27,59 @@ def load_documents():
 def create_chunks(documents):
     chunks = []
 
-    for document in documents:
+    for topic, document in documents.items():
         paragraphs = document.split("\n")
 
         for paragraph in paragraphs:
             paragraph = paragraph.strip()
 
             if paragraph:
-                chunks.append(paragraph)
+                chunks.append((topic, paragraph))
 
     return chunks
 
 
-# 3. Find relevant information
+# 3. Identify the question topic
+def detect_topic(question):
+    question = question.lower()
+
+    if any(word in question for word in [
+        "history", "dynasty", "king", "kingdom", "empire",
+        "tipu", "sultan", "vijayanagara", "gangas",
+        "rashtrakuta", "chalukya", "kempegowda"
+    ]):
+        return "history"
+
+    if any(word in question for word in [
+        "river", "mountain", "waterfall", "dam", "geography",
+        "forest", "soil", "natural resource", "climate",
+        "jog falls", "location"
+    ]):
+        return "geography"
+
+    if any(word in question for word in [
+        "culture", "tourism", "festival", "dasara", "dance",
+        "food", "temple", "tourist", "hampi", "mysuru palace"
+    ]):
+        return "culture_tourism"
+
+    if any(word in question for word in [
+        "economy", "development", "industry", "industries",
+        "agriculture", "crop", "it sector", "software",
+        "company", "employment", "business"
+    ]):
+        return "economy_development"
+
+    return None
+
+
+# 4. Retrieve relevant information from the correct topic
 def retrieve(question, chunks):
     stop_words = {
         "what", "when", "where", "which", "who", "why", "how",
         "tell", "about", "the", "and", "for", "from", "are",
-        "was", "is", "its", "this", "that", "can", "give"
+        "was", "is", "its", "this", "that", "can", "give",
+        "in", "of", "to", "on", "do", "does", "me"
     }
 
     question_words = set(
@@ -52,9 +88,16 @@ def retrieve(question, chunks):
 
     question_words -= stop_words
 
+    topic = detect_topic(question)
+
     scored_chunks = []
 
-    for chunk in chunks:
+    for chunk_topic, chunk in chunks:
+
+        # Filter by topic when detected
+        if topic and topic not in chunk_topic:
+            continue
+
         chunk_words = set(
             re.findall(r"\b[a-zA-Z]{3,}\b", chunk.lower())
         )
@@ -66,10 +109,10 @@ def retrieve(question, chunks):
 
     scored_chunks.sort(key=lambda item: item[0], reverse=True)
 
-    return [chunk for score, chunk in scored_chunks[:3]]
+    return [chunk for score, chunk in scored_chunks[:5]]
 
 
-# 4. Format answer into maximum 2 points
+# 5. Format answer into up to 5 points
 def format_answer(chunks):
     if not chunks:
         return "Information not found in my Karnataka knowledge base."
@@ -85,7 +128,7 @@ def format_answer(chunks):
             if sentence and sentence not in points:
                 points.append(sentence)
 
-    points = points[:2]
+    points = points[:5]
 
     return "\n".join(
         f"{i}. {point}"
@@ -93,7 +136,7 @@ def format_answer(chunks):
     )
 
 
-# 5. Main chatbot function
+# 6. Main chatbot function
 def get_answer(question):
     documents = load_documents()
 
