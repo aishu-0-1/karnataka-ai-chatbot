@@ -2,151 +2,177 @@
 import os
 import re
 
-DATA_FOLDER = os.path.join(os.path.dirname(__file__), "data")
+DATA_FOLDER = "data"
+
+DISTRICTS = [
+    "Bagalkote", "Ballari", "Belagavi", "Bengaluru Rural",
+    "Bengaluru Urban", "Bengaluru South", "Bidar", "Chamarajanagar",
+    "Chikkaballapur", "Chikkamagaluru", "Chitradurga",
+    "Dakshina Kannada", "Davanagere", "Dharwad", "Gadag", "Hassan",
+    "Haveri", "Kalaburagi", "Kodagu", "Kolar", "Koppal", "Mandya",
+    "Mysuru", "Raichur", "Shivamogga", "Tumakuru", "Udupi",
+    "Uttara Kannada", "Vijayapura", "Vijayanagara", "Yadgir"
+]
+
+TOPIC_FILES = {
+    "history": "history.txt",
+    "geography": "geography.txt",
+    "culture": "culture_tourism.txt",
+    "economy": "economy_development.txt"
+}
+
+TOPIC_NAMES = {
+    "history": "History and Heritage",
+    "geography": "Geography and Natural Resources",
+    "culture": "Culture and Tourism",
+    "economy": "Economy and Development"
+}
 
 
-# 1. Load knowledge files with their topic names
-def load_documents():
-    documents = {}
+def detect_district(question):
+    q = question.lower()
 
-    if not os.path.exists(DATA_FOLDER):
-        return documents
+    # Check longer district names first
+    for district in sorted(DISTRICTS, key=len, reverse=True):
+        if district.lower() in q:
+            return district
 
-    for file in os.listdir(DATA_FOLDER):
-        path = os.path.join(DATA_FOLDER, file)
-
-        if file.endswith(".txt"):
-            with open(path, "r", encoding="utf-8") as f:
-                topic = file.replace(".txt", "").lower()
-                documents[topic] = f.read()
-
-    return documents
-
-
-# 2. Split documents into small paragraphs
-def create_chunks(documents):
-    chunks = []
-
-    for topic, document in documents.items():
-        paragraphs = document.split("\n")
-
-        for paragraph in paragraphs:
-            paragraph = paragraph.strip()
-
-            if paragraph:
-                chunks.append((topic, paragraph))
-
-    return chunks
-
-
-# 3. Identify the question topic
-def detect_topic(question):
-    question = question.lower()
-
-    if any(word in question for word in [
-        "history", "dynasty", "king", "kingdom", "empire",
-        "tipu", "sultan", "vijayanagara", "gangas",
-        "rashtrakuta", "chalukya", "kempegowda"
-    ]):
-        return "history"
-
-    if any(word in question for word in [
-        "river", "mountain", "waterfall", "dam", "geography",
-        "forest", "soil", "natural resource", "climate",
-        "jog falls", "location"
-    ]):
-        return "geography"
-
-    if any(word in question for word in [
-        "culture", "tourism", "festival", "dasara", "dance",
-        "food", "temple", "tourist", "hampi", "mysuru palace"
-    ]):
-        return "culture_tourism"
-
-    if any(word in question for word in [
-        "economy", "development", "industry", "industries",
-        "agriculture", "crop", "it sector", "software",
-        "company", "employment", "business"
-    ]):
-        return "economy_development"
+    # Ramanagara is also known as Bengaluru South district
+    if "ramanagara" in q:
+        return "Bengaluru South"
 
     return None
 
 
-# 4. Retrieve relevant information from the correct topic
-def retrieve(question, chunks):
-    stop_words = {
-        "what", "when", "where", "which", "who", "why", "how",
-        "tell", "about", "the", "and", "for", "from", "are",
-        "was", "is", "its", "this", "that", "can", "give",
-        "in", "of", "to", "on", "do", "does", "me"
-    }
+def detect_topic(question):
+    q = question.lower()
 
-    question_words = set(
-        re.findall(r"\b[a-zA-Z]{3,}\b", question.lower())
-    )
+    if any(word in q for word in [
+        "history", "historical", "heritage", "dynasty", "ruler"
+    ]):
+        return "history"
 
-    question_words -= stop_words
+    if any(word in q for word in [
+        "geography", "river", "mountain", "soil", "climate",
+        natural resource", "resources"
+    ]):
+        return "geography"
 
-    topic = detect_topic(question)
+    if any(word in q for word in [
+        "culture", "tourism", "tourist", "festival",
+        temple", "food", "tradition"
+    ]):
+        return "culture"
 
-    scored_chunks = []
+    if any(word in q for word in [
+        "economy", "development", "industry", "agriculture",
+        "business", "employment", "economic"
+    ]):
+        return "economy"
 
-    for chunk_topic, chunk in chunks:
+    return None
 
-        # Filter by topic when detected
-        if topic and topic not in chunk_topic:
+
+def read_file(file_path):
+    if not os.path.exists(file_path):
+        return ""
+
+    with open(file_path, "r", encoding="utf-8") as file:
+        return file.read()
+
+
+def normalize(text):
+    return re.sub(r"[^a-z]", "", text.lower())
+
+
+def parse_district_sections(content):
+    sections = {}
+    current_district = None
+
+    for line in content.splitlines():
+        line = line.strip()
+
+        if not line:
             continue
 
-        chunk_words = set(
-            re.findall(r"\b[a-zA-Z]{3,}\b", chunk.lower())
+        # Identify district heading
+        cleaned = re.sub(r"^DISTRICT\s*:\s*", "", line, flags=re.I)
+        cleaned = cleaned.rstrip(":").strip()
+
+        matched_district = None
+
+        for district in DISTRICTS:
+            if normalize(cleaned) == normalize(district):
+                matched_district = district
+                break
+
+        if matched_district:
+            current_district = matched_district
+            sections[current_district] = []
+            continue
+
+        # Collect numbered points
+        if current_district:
+            point_match = re.match(
+                r"^\s*(?:\d+[\.\)]|[-*])\s*(.+)$", line
+            )
+
+            if point_match:
+                point = point_match.group(1).strip()
+                if point:
+                    sections[current_district].append(point)
+
+    return sections
+
+
+def load_base():
+    database = {}
+
+    for topic, filename in TOPIC_FILES.items():
+        file_path = os.path.join(DATA_FOLDER, filename)
+        content = read_file(file_path)
+        database[topic] = parse_district_sections(content)
+
+    return database
+
+
+def retrieve(database, district, topic):
+    if topic not in database:
+        return []
+
+    district_data = database[topic].get(district, [])
+    return district_data
+
+
+def get_answer(question):
+    district = detect_district(question)
+    topic = detect_topic(question)
+
+    if not district:
+        return (
+            "Please mention a Karnataka district name in your question. "
+            "Example: Explain Dharwad history."
         )
 
-        score = len(question_words & chunk_words)
+    if not topic:
+        return (
+            "Please mention a topic: History, Geography, "
+            "Culture and Tourism, or Economy and Development."
+        )
 
-        if score > 0:
-            scored_chunks.append((score, chunk))
+    database = load_base()
+    points = retrieve(database, district, topic)
 
-    scored_chunks.sort(key=lambda item: item[0], reverse=True)
+    if not points:
+        return (
+            f"Information Missing: I could not find {topic} information "
+            f"for {district} in the document."
+        )
 
-    return [chunk for score, chunk in scored_chunks[:5]]
+    answer = f"DISTRICT: {district}\n"
+    answer += f"TOPIC: {TOPIC_NAMES[topic]}\n\n"
 
-
-# 5. Format answer into up to 5 points
-def format_answer(chunks):
-    if not chunks:
-        return "Information not found in my Karnataka knowledge base."
-
-    points = []
-
-    for chunk in chunks:
-        sentences = re.split(r"(?<=[.!?])\s+", chunk.strip())
-
-        for sentence in sentences:
-            sentence = sentence.strip()
-
-            if sentence and sentence not in points:
-                points.append(sentence)
-
-    points = points[:5]
-
-    return "\n".join(
-        f"{i}. {point}"
-        for i, point in enumerate(points, start=1)
-    )
-
-
-# 6. Main chatbot function
-def get_answer(question):
-    documents = load_documents()
-
-    if not documents:
-        return "No Karnataka information files found."
-
-    chunks = create_chunks(documents)
-
-    results = retrieve(question, chunks)
-
-    answer = format_answer(results)
+    for i, point in enumerate(points[:4], start=1):
+        answer += f"{i}. {point}\n"
 
     return answer
