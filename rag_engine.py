@@ -1,175 +1,274 @@
-
-import os
 import re
+from pathlib import Path
 
-DATA_FOLDER = "data"
+# =========================================================
+# 1. DATA FILE LOCATION
+# =========================================================
+BASE_DIR = Path(__file__).resolve().parent
+DATA_DIR = BASE_DIR / "data"
 
-DISTRICTS = [
-    "Bagalkote", "Ballari", "Belagavi", "Bengaluru Rural",
-    "Bengaluru Urban", "Bengaluru South", "Bidar", "Chamarajanagar",
-    "Chikkaballapur", "Chikkamagaluru", "Chitradurga",
-    "Dakshina Kannada", "Davanagere", "Dharwad", "Gadag", "Hassan",
-    "Haveri", "Kalaburagi", "Kodagu", "Kolar", "Koppal", "Mandya",
-    "Mysuru", "Raichur", "Shivamogga", "Tumakuru", "Udupi",
-    "Uttara Kannada", "Vijayapura", "Vijayanagara", "Yadgir"
-]
+# =========================================================
+# 2. DISTRICT NAMES AND ALIASES
+# =========================================================
+DISTRICT_ALIASES = {
+    "Bagalkote": ["bagalkote", "bagalkot"],
+    "Ballari": ["ballari", "bellary"],
+    "Belagavi": ["belagavi", "belgaum"],
+    "Bengaluru Rural": ["bengaluru rural", "bangalore rural"],
+    "Bengaluru Urban": ["bengaluru urban", "bangalore urban", "bengaluru", "bangalore"],
+    "Bengaluru South": ["bengaluru south", "ramanagara", "ram nagara"],
+    "Bidar": ["bidar"],
+    "Chamarajanagar": ["chamarajanagar", "chamaraja nagar"],
+    "Chikkaballapur": ["chikkaballapur", "chikballapur"],
+    "Chikkamagaluru": ["chikkamagaluru", "chikmagalur"],
+    "Chitradurga": ["chitradurga"],
+    "Dakshina Kannada": ["dakshina kannada", "south kannara", "mangalore district"],
+    "Davanagere": ["davanagere", "davangere"],
+    "Dharwad": ["dharwad"],
+    "Gadag": ["gadag"],
+    "Hassan": ["hassan"],
+    "Haveri": ["haveri"],
+    "Kalaburagi": ["kalaburagi", "gulbarga"],
+    "Kodagu": ["kodagu", "coorg"],
+    "Kolar": ["kolar"],
+    "Koppal": ["koppal"],
+    "Mandya": ["mandya"],
+    "Mysuru": ["mysuru", "mysore"],
+    "Raichur": ["raichur"],
+    "Shivamogga": ["shivamogga", "shimoga"],
+    "Tumakuru": ["tumakuru", "tumkur", "tummkur", "tummkruu", "tummkru", "tumkru"],
+    "Udupi": ["udupi"],
+    "Uttara Kannada": ["uttara kannada", "north kannara", "karwar district"],
+    "Vijayapura": ["vijayapura", "bijapur"],
+    "Vijayanagara": ["vijayanagara", "vijayanagaram"],
+    "Yadgir": ["yadgir", "yadagiri"],
+}
 
+# =========================================================
+# 3. TOPIC FILES
+# =========================================================
 TOPIC_FILES = {
     "history": "history.txt",
     "geography": "geography.txt",
     "culture": "culture_tourism.txt",
-    "economy": "economy_development.txt"
+    "economy": "economy_development.txt",
 }
 
-TOPIC_NAMES = {
-    "history": "History and Heritage",
-    "geography": "Geography and Natural Resources",
-    "culture": "Culture and Tourism",
-    "economy": "Economy and Development"
+TOPIC_KEYWORDS = {
+    "history": [
+        "history", "historical", "heritage", "dynasty",
+        "fort", "king", "ancient", "empire"
+    ],
+    "geography": [
+        "geography", "river", "rivers", "climate", "soil",
+        "mountain", "hill", "natural resource", "resources"
+    ],
+    "culture": [
+        "culture", "tourism", "tourist", "festival",
+        "food", "tradition", "temple", "places to visit"
+    ],
+    "economy": [
+        "economy", "economic", "development", "industry",
+        "industries", "agriculture", "business", "employment"
+    ],
 }
 
-
+# =========================================================
+# 4. DISTRICT DETECTION
+# =========================================================
 def detect_district(question):
     q = question.lower()
 
-    for district in sorted(DISTRICTS, key=len, reverse=True):
-        if district.lower() in q:
+    # Match longer aliases first
+    aliases_sorted = sorted(
+        [
+            (district, alias)
+            for district, aliases in DISTRICT_ALIASES.items()
+            for alias in aliases
+        ],
+        key=lambda item: len(item[1]),
+        reverse=True
+    )
+
+    for district, alias in aliases_sorted:
+        pattern = r"(?<!\w)" + re.escape(alias) + r"(?!\w)"
+        if re.search(pattern, q):
             return district
 
-    if "ramanagara" in q:
-        return "Bengaluru South"
-
     return None
 
-
-def detect_topic(question):
+# =========================================================
+# 5. TOPIC DETECTION
+# =========================================================
+def detect_topics(question):
     q = question.lower()
+    found = []
 
-    if any(word in q for word in [
-        "history", "historical", "heritage", "dynasty", "ruler"
-    ]):
-        return "history"
+    for topic, keywords in TOPIC_KEYWORDS.items():
+        if any(keyword in q for keyword in keywords):
+            found.append(topic)
 
-    if any(word in q for word in [
-        "geography", "river", "mountain", "soil", "climate",
-        "natural resource", "resources"
-    ]):
-        return "geography"
+    # If no topic is mentioned, search all topics
+    if not found:
+        return list(TOPIC_FILES.keys())
 
-    if any(word in q for word in [
-        "culture", "tourism", "tourist", "festival",
-        "temple", "food", "tradition"
-    ]):
-        return "culture"
+    return found
 
-    if any(word in q for word in [
-        "economy", "development", "industry", "agriculture",
-        "business", "employment", "economic"
-    ]):
-        return "economy"
+# =========================================================
+# 6. LOAD A TEXT FILE
+# =========================================================
+def load_file(filename):
+    file_path = DATA_DIR / filename
 
-    return None
-
-
-def read_file(file_path):
-    if not os.path.exists(file_path):
+    if not file_path.exists():
         return ""
 
-    with open(file_path, "r", encoding="utf-8") as file:
-        return file.read()
+    try:
+        return file_path.read_text(encoding="utf-8")
+    except Exception:
+        return ""
 
+# =========================================================
+# 7. CLEAN DISTRICT HEADING
+# =========================================================
+def clean_heading(line):
+    line = line.strip()
 
-def normalize(text):
-    return re.sub(r"[^a-z]", "", text.lower())
+    # Remove Markdown heading marks
+    line = re.sub(r"^#+\s*", "", line)
 
+    # Remove common heading prefixes
+    line = re.sub(
+        r"^(DISTRICT|DISTRICT NAME)\s*:\s*",
+        "",
+        line,
+        flags=re.IGNORECASE
+    )
 
-def parse_district_sections(content):
-    sections = {}
+    # Remove trailing colon
+    line = line.rstrip(":").strip()
+
+    return line.lower()
+
+# =========================================================
+# 8. CHECK WHETHER LINE IS A DISTRICT HEADER
+# =========================================================
+def get_district_from_heading(line):
+    cleaned = clean_heading(line)
+
+    for district, aliases in DISTRICT_ALIASES.items():
+        possible_names = [district.lower()] + aliases
+
+        for name in possible_names:
+            if cleaned == name.lower():
+                return district
+
+    return None
+
+# =========================================================
+# 9. EXTRACT DISTRICT SECTION FROM TEXT
+# =========================================================
+def extract_district_section(text, target_district):
+    if not text:
+        return ""
+
+    lines = text.splitlines()
+    sections = []
     current_district = None
+    current_lines = []
 
-    for line in content.splitlines():
-        line = line.strip()
+    for line in lines:
+        heading_district = get_district_from_heading(line)
 
-        if not line:
+        # New district heading found
+        if heading_district:
+
+            # Save previous section
+            if current_district == target_district:
+                sections.extend(current_lines)
+
+            current_district = heading_district
+            current_lines = []
             continue
 
-        cleaned = re.sub(
-            r"^DISTRICT\s*:\s*", "", line, flags=re.IGNORECASE
-            )
-        cleaned = cleaned.rstrip(":").strip()
+        # Store lines belonging to current district
+        if current_district == target_district:
+            current_lines.append(line)
 
-        matched_district = None
+    # Save the last district section
+    if current_district == target_district:
+        sections.extend(current_lines)
 
-        for district in DISTRICTS:
-            if normalize(cleaned) == normalize(district):
-                matched_district = district
-                break
+    result = "\n".join(sections).strip()
 
-        if matched_district:
-            current_district = matched_district
-            sections[current_district] = []
+    return result
+
+# =========================================================
+# 10. RETRIEVE DISTRICT INFORMATION
+# =========================================================
+def retrieve_district_info(district, topics):
+    results = []
+
+    for topic in topics:
+        filename = TOPIC_FILES.get(topic)
+
+        if not filename:
             continue
 
-        if current_district:
-            point_match = re.match(
-                r"^\s*(?:\d+[\.\)]|[-*])\s*(.+)$", line
+        text = load_file(filename)
+
+        section = extract_district_section(text, district)
+
+        if section:
+            results.append(
+                f"### {topic.title()} – {district}\n{section}"
             )
 
-            if point_match:
-                point = point_match.group(1).strip()
-                if point:
-                    sections[current_district].append(point)
+    return results
 
-    return sections
-
-
-def load_base():
-    database = {}
-
-    for topic, filename in TOPIC_FILES.items():
-        file_path = os.path.join(DATA_FOLDER, filename)
-        content = read_file(file_path)
-        database[topic] = parse_district_sections(content)
-
-    return database
-
-
-def retrieve(database, district, topic):
-    if topic not in database:
-        return []
-
-    return database[topic].get(district, [])
-
-
-def get_answer(question):
-    district = detect_district(question)
-    topic = detect_topic(question)
-
-    if not district:
+# =========================================================
+# 11. FORMAT ANSWER
+# =========================================================
+def format_answer(district, results):
+    if not results:
         return (
-            "Please mention a Karnataka district name. "
-            "Example: Explain Dharwad history."
+            f"Sorry, I couldn't find information for **{district}** "
+            "in the selected knowledge files.\n\n"
+            "Please check the district name or add the district's "
+            "information to the data files."
         )
 
-    if not topic:
-        return (
-            "Please mention a topic: History, Geography, "
-            "Culture and Tourism, or Economy and Development."
-        )
+    answer = f"## 📍 District: {district}\n\n"
 
-    database = load_base()
-    points = retrieve(database, district, topic)
-
-    if not points:
-        return (
-            f"Information Missing: No {topic} information "
-            f"found for {district} in the document."
-        )
-
-    answer = f"DISTRICT: {district}\n"
-    answer += f"TOPIC: {TOPIC_NAMES[topic]}\n\n"
-
-    for i, point in enumerate(points[:4], start=1):
-        answer += f"{i}. {point}\n"
+    answer += "\n\n".join(results)
 
     return answer
+
+# =========================================================
+# 12. MAIN CHATBOT FUNCTION
+# =========================================================
+def get_answer(question):
+    if not question or not question.strip():
+        return "Please enter a question about Karnataka."
+
+    # Find district
+    district = detect_district(question)
+
+    if district is None:
+        return (
+            "Please mention a Karnataka district name.\n\n"
+            "**Examples:**\n"
+            "- Explain Tumakuru history\n"
+            "- Explain Tumkur geography\n"
+            "- Explain Bengaluru culture\n"
+            "- Explain Dharwad"
+        )
+
+    # Find topic
+    topics = detect_topics(question)
+
+    # Retrieve information from topic files
+    results = retrieve_district_info(district, topics)
+
+    # Create final answer
+    return format_answer(district, results)
