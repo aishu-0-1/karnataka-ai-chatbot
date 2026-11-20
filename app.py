@@ -2,27 +2,26 @@
 import streamlit as st
 from rag_engine import get_answer
 
-# ==================================================
-# PAGE CONFIGURATION
-# ==================================================
+# =====================================================
+# 1. PAGE CONFIGURATION
+# =====================================================
 st.set_page_config(
     page_title="Karnataka AI Chatbot",
-    page_icon="💜",
+    page_icon="🌿",
     layout="wide"
 )
 
-# ==================================================
-# SESSION STATE
-# ==================================================
+# =====================================================
+# 2. CHAT SESSION
+# =====================================================
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
-# ==================================================
-# CUSTOM CSS DESIGN
-# ==================================================
+# =====================================================
+# 3. CUSTOM CSS
+# =====================================================
 st.markdown("""
 <style>
-
 .stApp {
     background: linear-gradient(135deg, #faf3ff, #fff0f7, #edf7ff);
 }
@@ -37,18 +36,18 @@ st.markdown("""
 
 .main-heading {
     text-align: center;
+    color: #682d96;
     font-size: 38px;
     font-weight: 900;
-    color: #682d96;
 }
 
 .hero {
     background: linear-gradient(135deg, #f5ddff, #ffe5f3, #e3f4ff);
-    padding: 30px 20px;
+    padding: 32px 20px;
     border-radius: 24px;
     border: 1px solid #ead3ff;
     text-align: center;
-    margin-bottom: 25px;
+    margin: 15px 0 25px 0;
 }
 
 .hero-subtitle {
@@ -60,20 +59,15 @@ st.markdown("""
 
 .hero-description {
     color: #665374;
-    font-size: 14px;
+    font-size: 15px;
 }
 
 .topic-card {
     padding: 22px 12px;
     border-radius: 20px;
-    min-height: 190px;
+    min-height: 185px;
     text-align: center;
     margin-bottom: 12px;
-    transition: transform 0.2s;
-}
-
-.topic-card:hover {
-    transform: translateY(-4px);
 }
 
 .topic-card h2 {
@@ -116,9 +110,9 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# ==================================================
-# TEAM MEMBERS
-# ==================================================
+# =====================================================
+# 4. TEAM MEMBERS
+# =====================================================
 team_members = [
     "Jyothi",
     "Aishwarya",
@@ -126,9 +120,9 @@ team_members = [
     "Madava"
 ]
 
-# ==================================================
-# SIDEBAR
-# ==================================================
+# =====================================================
+# 5. SIDEBAR
+# =====================================================
 with st.sidebar:
 
     st.markdown("# 🌿 Karnataka AI")
@@ -142,28 +136,28 @@ with st.sidebar:
         st.markdown("### 🔄 How It Works")
 
         st.markdown("""
-**1. 📥 Data Collection**  
-Collect Karnataka district information.
+**1. Data Collection**  
+Collect information about Karnataka districts.
 
-**2. 📂 Knowledge Base**  
+**2. Knowledge Base**  
 Organize information into four topic files.
 
-**3. 📄 Text Processing**  
-Read and process the stored text documents.
+**3. Text Processing**  
+Read and process stored information.
 
-**4. 📍 District Detection**  
+**4. District Detection**  
 Identify the district mentioned in the question.
 
-**5. 📚 Topic Detection**  
-Identify the requested topic.
+**5. Topic Detection**  
+Identify the topic of the question.
 
-**6. 🔎 Information Retrieval**  
+**6. Information Retrieval**  
 Retrieve the matching district information.
 
-**7. 🤖 Answer Preparation**  
-Prepare an answer using retrieved information.
+**7. Answer Preparation**  
+Prepare the answer from retrieved information.
 
-**8. 💬 Chatbot Response**  
+**8. Chatbot Response**  
 Display the answer to the user.
 """)
 
@@ -181,27 +175,25 @@ economy and development through simple questions.
 """)
 
         st.markdown("---")
-
         st.markdown("### 🎯 Project Objectives")
 
         st.markdown("""
 - Provide district-specific information.
 - Cover Karnataka's 31 districts.
 - Organize information into four topics.
-- Make information easier to explore.
-- Answer district-related questions.
+- Make district information easy to explore.
+- Answer users' district-related questions.
 """)
 
         st.markdown("---")
-
         st.markdown("### 📚 Topics")
 
         st.markdown("""
 **🏛️ History & Heritage**  
-History, dynasties, monuments and heritage.
+Historical places, dynasties and heritage.
 
 **🌄 Geography & Natural Resources**  
-Rivers, climate, landscape and resources.
+Rivers, climate, landscapes and resources.
 
 **🎭 Culture & Tourism**  
 Festivals, traditions, tourist places and food.
@@ -211,14 +203,6 @@ Agriculture, industries and regional development.
 """)
 
         st.markdown("---")
-
-        st.markdown("### 👥 Team Members")
-
-        for number, member in enumerate(team_members, start=1):
-            st.markdown(f"**{number}. 👤 {member}**")
-
-        st.markdown("---")
-
         st.markdown("### 💻 Technologies Used")
 
         st.markdown("""
@@ -227,6 +211,12 @@ Agriculture, industries and regional development.
 - Text-based knowledge files
 - District and topic retrieval
 """)
+
+        st.markdown("---")
+        st.markdown("### 👥 Team Members")
+
+        for number, member in enumerate(team_members, start=1):
+            st.markdown(f"**{number}. {member}**")
 
         st.markdown("---")
         st.caption("Computer Science and Engineering")
@@ -240,9 +230,9 @@ Agriculture, industries and regional development.
         st.session_state.messages = []
         st.rerun()
 
-# ==================================================
-# MAIN HOME PAGE
-# ==================================================
+# =====================================================
+# 6. MAIN HOME PAGE
+# =====================================================
 
 st.markdown("""
 <div class="main-heading">
@@ -250,70 +240,65 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# WELCOME BANNER (UPDATED)
+# WELCOME BANNER
 st.markdown("""
 <div class="hero">
-    <div class="hero-subtitle">
-        Your Karnataka Knowledge Assistant
-    </div>
-
-    <br>
-
-    <div class="hero-description">
-        Explore Karnataka's 31 districts through history, geography,
-        culture, tourism, economy and development.
-    </div>
+<div class="hero-subtitle">Your Karnataka Knowledge Assistant</div>
+<div class="hero-description">
+Discover the beauty, history and culture of Karnataka ✨
+</div>
 </div>
 """, unsafe_allow_html=True)
 
-# EXPLORE TOPICS
+# =====================================================
+# 7. EXPLORE TOPICS
+# =====================================================
 st.markdown(
     "<h3 style='text-align:center;color:#8a48b5;'>✨ Explore Topics ✨</h3>",
     unsafe_allow_html=True
 )
 
-# TOPIC CARDS
 col1, col2, col3, col4 = st.columns(4)
 
 with col1:
     st.markdown("""
-    <div class="topic-card history-card">
-        <h2>🏛️</h2>
-        <h4>History & Heritage</h4>
-        <p>Discover Karnataka's history and heritage.</p>
-    </div>
-    """, unsafe_allow_html=True)
+<div class="topic-card history-card">
+<h2>🏛️</h2>
+<h4>History & Heritage</h4>
+<p>Discover Karnataka's history and heritage.</p>
+</div>
+""", unsafe_allow_html=True)
 
 with col2:
     st.markdown("""
-    <div class="topic-card geography-card">
-        <h2>🌄</h2>
-        <h4>Geography</h4>
-        <p>Explore landscapes and natural resources.</p>
-    </div>
-    """, unsafe_allow_html=True)
+<div class="topic-card geography-card">
+<h2>🌄</h2>
+<h4>Geography</h4>
+<p>Explore landscapes and natural resources.</p>
+</div>
+""", unsafe_allow_html=True)
 
 with col3:
     st.markdown("""
-    <div class="topic-card culture-card">
-        <h2>🎭</h2>
-        <h4>Culture & Tourism</h4>
-        <p>Discover traditions and tourist places.</p>
-    </div>
-    """, unsafe_allow_html=True)
+<div class="topic-card culture-card">
+<h2>🎭</h2>
+<h4>Culture & Tourism</h4>
+<p>Discover traditions and tourist places.</p>
+</div>
+""", unsafe_allow_html=True)
 
 with col4:
     st.markdown("""
-    <div class="topic-card economy-card">
-        <h2>📈</h2>
-        <h4>Economy & Development</h4>
-        <p>Explore industries and development.</p>
-    </div>
-    """, unsafe_allow_html=True)
+<div class="topic-card economy-card">
+<h2>📈</h2>
+<h4>Economy & Development</h4>
+<p>Explore industries and development.</p>
+</div>
+""", unsafe_allow_html=True)
 
-# ==================================================
-# CHAT AREA
-# ==================================================
+# =====================================================
+# 8. CHAT AREA
+# =====================================================
 st.markdown("---")
 
 st.markdown(
@@ -323,7 +308,7 @@ st.markdown(
 
 st.caption("Ask a question about any of Karnataka's 31 districts.")
 
-# DISPLAY CHAT HISTORY
+# DISPLAY PREVIOUS MESSAGES
 for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
@@ -343,10 +328,9 @@ if question:
 
     with st.chat_message("assistant"):
 
-        with st.spinner("🌿 Exploring Karnataka information..."):
+        with st.spinner("🌿 Searching Karnataka information..."):
             try:
                 answer = get_answer(question)
-
             except Exception as error:
                 answer = "Sorry, an error occurred while processing your question."
                 st.error(str(error))
