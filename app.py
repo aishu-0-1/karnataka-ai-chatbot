@@ -9,30 +9,30 @@ st.set_page_config(
     layout="wide"
 )
 
-# ---------------- DESIGN ----------------
+# ---------------- CUSTOM DESIGN ----------------
 st.markdown("""
 <style>
 .stApp {
     background: linear-gradient(135deg, #f8efff, #f0e6ff, #e7f4ff);
 }
 [data-testid="stSidebar"] {
-    background: linear-gradient(180deg, #38145c, #7541b8, #a56ae0);
+    background: linear-gradient(180deg, #32104f, #6637a5, #8957c9);
 }
 [data-testid="stSidebar"] * {
-    color: white !important;
+    color: white;
 }
-.title {
-    font-size: 40px;
+.main-title {
+    font-size: 38px;
     font-weight: 800;
-    color: #823ec4;
+    color: #873ec4;
 }
-.card {
+.info-card {
     background: white;
-    padding: 22px;
-    border-radius: 18px;
-    border: 1px solid #e5d5fa;
-    box-shadow: 0 4px 15px rgba(120,70,170,0.12);
-    margin-bottom: 15px;
+    padding: 18px;
+    border-radius: 16px;
+    border: 1px solid #e7d7fa;
+    box-shadow: 0 4px 12px rgba(100, 60, 150, 0.12);
+    margin-bottom: 12px;
 }
 </style>
 """, unsafe_allow_html=True)
@@ -45,194 +45,157 @@ team_members = [
     "Madava"
 ]
 
+# ---------------- CHAT HISTORY ----------------
+if "messages" not in st.session_state:
+    st.session_state.messages = []
+
 # ---------------- SIDEBAR ----------------
 with st.sidebar:
-    st.markdown("## 💜 Karnataka AI")
-    st.caption("District Information Chatbot")
+
+    st.markdown("# 💜 Karnataka AI")
+    st.caption("AI Tourism & District Information Assistant")
     st.markdown("---")
 
-    page = st.radio(
-        "Navigation",
-        [
-            "🏠 Home / Chat",
-            "⚙️ Project Pipeline",
-            "ℹ️ Project Info"
-        ]
-    )
+    # PROJECT PIPELINE
+    with st.expander("⚙️ Project Pipeline", expanded=False):
+        st.markdown("### How the chatbot works")
+
+        st.markdown("""
+        **1. Data Collection**  
+        Collect Karnataka district information.
+
+        **2. Knowledge Base**  
+        Organize information into 4 topic files.
+
+        **3. Text Processing**  
+        Read and process the stored text.
+
+        **4. District Detection**  
+        Identify the district from the user's question.
+
+        **5. Topic Detection**  
+        Identify the topic being asked.
+
+        **6. Information Retrieval**  
+        Retrieve the matching district information.
+
+        **7. Answer Generation**  
+        Prepare a relevant answer.
+
+        **8. Chatbot Response**  
+        Display the answer to the user.
+        """)
+
+    # PROJECT INFO
+    with st.expander("ℹ️ About Project", expanded=False):
+        st.markdown("### 📌 About Project")
+
+        st.write("""
+        Karnataka AI Chatbot is an interactive assistant that provides
+        information about Karnataka districts. It helps users explore
+        history, geography, culture, tourism and development.
+        """)
+
+        st.markdown("---")
+        st.markdown("### 🎯 Project Objectives")
+
+        st.markdown("""
+        - Provide district-specific information.
+        - Cover all 31 Karnataka districts.
+        - Organize information into different topics.
+        - Make information easy for users to explore.
+        """)
+
+    # TECHNOLOGIES
+    with st.expander("💻 Technologies Used", expanded=False):
+        st.markdown("""
+        - 🐍 Python
+        - 🌐 Streamlit
+        - 📄 Text files
+        - 🔎 Information retrieval
+        - 🤖 AI question-answering interface
+        """)
+
+    # TOPICS
+    with st.expander("📚 Project Topics", expanded=False):
+        st.markdown("""
+        **🏰 History & Heritage**  
+        Historical places, dynasties and heritage.
+
+        **🌍 Geography & Natural Resources**  
+        Rivers, climate, landscape and natural resources.
+
+        **🎭 Culture & Tourism**  
+        Festivals, traditions, tourist places and local food.
+
+        **🏭 Economy & Development**  
+        Agriculture, industries and economic development.
+        """)
+
+    # TEAM MEMBERS
+    with st.expander("👥 Team Members", expanded=False):
+        st.markdown("### Our Project Team")
+
+        for i, member in enumerate(team_members, start=1):
+            st.markdown(f"**{i}. 👤 {member}**")
+
+        st.markdown("---")
+        st.caption("Computer Science and Engineering")
+        st.caption("Shridevi Institute of Engineering and Technology")
 
     st.markdown("---")
-    st.caption("🗺️ 31 Districts")
-    st.caption("📚 4 Knowledge Topics")
+    st.caption("📍 Karnataka, India")
+    st.caption("31 Districts • 4 Topics")
 
-    if st.button("🗑️ Clear Chat"):
+    if st.button("🗑️ Clear Chat", use_container_width=True):
         st.session_state.messages = []
         st.rerun()
 
-# ---------------- HOME / CHAT ----------------
-if page == "🏠 Home / Chat":
+# ---------------- MAIN CHAT PAGE ----------------
+st.markdown(
+    '<div class="main-title">💜 Karnataka AI Chatbot</div>',
+    unsafe_allow_html=True
+)
 
-    st.markdown(
-        '<div class="title">💜 Karnataka AI Chatbot</div>',
-        unsafe_allow_html=True
-    )
+st.markdown("### Explore Karnataka, one question at a time.")
 
-    st.write("### Your Karnataka District Information Assistant")
+st.markdown("""
+<div class="info-card">
+<b>Welcome! 👋</b><br><br>
+Ask about Karnataka districts, history, geography, culture, tourism,
+economy and development.
+</div>
+""", unsafe_allow_html=True)
 
-    st.markdown("""
-    <div class="card">
-    👋 Welcome to Karnataka AI Chatbot!<br><br>
-    Ask questions about Karnataka districts, history, geography,
-    culture, tourism, economy and development.
-    </div>
-    """, unsafe_allow_html=True)
+# ---------------- DISPLAY CHAT HISTORY ----------------
+for message in st.session_state.messages:
+    with st.chat_message(message["role"]):
+        st.markdown(message["content"])
 
-    if "messages" not in st.session_state:
-        st.session_state.messages = []
+# ---------------- CHAT INPUT ----------------
+question = st.chat_input("Ask about any Karnataka district...")
 
-    # Display chat history
-    for message in st.session_state.messages:
-        with st.chat_message(message["role"]):
-            st.markdown(message["content"])
+if question:
 
-    question = st.chat_input("Ask about any Karnataka district...")
+    st.session_state.messages.append({
+        "role": "user",
+        "content": question
+    })
 
-    if question:
-        st.session_state.messages.append(
-            {"role": "user", "content": question}
-        )
+    with st.chat_message("user"):
+        st.markdown(question)
 
-        with st.chat_message("user"):
-            st.markdown(question)
+    with st.chat_message("assistant"):
+        with st.spinner("Searching Karnataka information..."):
+            try:
+                answer = get_answer(question)
+            except Exception as e:
+                answer = "Sorry, an error occurred while processing your question."
+                st.error(str(e))
 
-        with st.chat_message("assistant"):
-            with st.spinner("Searching district information..."):
-                try:
-                    answer = get_answer(question)
-                except Exception as e:
-                    answer = "Sorry, an error occurred."
-                    st.error(str(e))
+        st.markdown(answer)
 
-            st.markdown(answer)
-
-        st.session_state.messages.append(
-            {"role": "assistant", "content": answer}
-        )
-
-# ---------------- PROJECT PIPELINE ----------------
-elif page == "⚙️ Project Pipeline":
-
-    st.markdown(
-        '<div class="title">⚙️ Project Pipeline</div>',
-        unsafe_allow_html=True
-    )
-
-    st.markdown("""
-    <div class="card">
-    <h3>About the Project Workflow</h3>
-    Karnataka AI Chatbot uses district-based information retrieval
-    to answer questions about Karnataka.
-    </div>
-    """, unsafe_allow_html=True)
-
-    pipeline = [
-        ("📥 Step 1 — Data Collection",
-         "Collect information about Karnataka and its 31 districts."),
-        ("📂 Step 2 — Knowledge Base",
-         "Organize information into four topic text files."),
-        ("📖 Step 3 — Text Processing",
-         "Read and organize the stored district information."),
-        ("📍 Step 4 — District Detection",
-         "Identify the district name in the user's question."),
-        ("📚 Step 5 — Topic Detection",
-         "Identify the requested topic such as History or Geography."),
-        ("🔎 Step 6 — Information Retrieval",
-         "Retrieve the information belonging to the selected district and topic."),
-        ("🤖 Step 7 — Answer Generation",
-         "Prepare a clear answer using the retrieved information."),
-        ("💬 Step 8 — Display Answer",
-         "Show the answer to the user through the chatbot interface.")
-    ]
-
-    for title, description in pipeline:
-        st.markdown(f"""
-        <div class="card">
-        <h4>{title}</h4>
-        <p>{description}</p>
-        </div>
-        """, unsafe_allow_html=True)
-
-# ---------------- PROJECT INFO ----------------
-elif page == "ℹ️ Project Info":
-
-    st.markdown(
-        '<div class="title">ℹ️ Project Info</div>',
-        unsafe_allow_html=True
-    )
-
-    # ABOUT
-    st.markdown("""
-    <div class="card">
-    <h2>💜 About the Project</h2>
-    Karnataka AI Chatbot is an interactive chatbot designed to provide
-    district-specific information about Karnataka. It helps users explore
-    the state's history, geography, culture, tourism, economy and development
-    through simple questions and answers.
-    </div>
-    """, unsafe_allow_html=True)
-
-    # OBJECTIVES
-    st.markdown("""
-    <div class="card">
-    <h3>🎯 Project Objectives</h3>
-    <ul>
-    <li>Provide information about Karnataka's 31 districts.</li>
-    <li>Organize district knowledge into different topics.</li>
-    <li>Retrieve relevant information based on user questions.</li>
-    <li>Make regional information easy to understand and explore.</li>
-    </ul>
-    </div>
-    """, unsafe_allow_html=True)
-
-    # TOPICS
-    st.markdown("## 📚 Topics")
-
-    topics = [
-        ("🏰 History & Heritage",
-         "Dynasties, historical places, forts and heritage."),
-        ("🌍 Geography & Natural Resources",
-         "Rivers, climate, landscapes, soil and natural resources."),
-        ("🎭 Culture & Tourism",
-         "Festivals, traditions, tourist attractions and local food."),
-        ("🏭 Economy & Development",
-         "Agriculture, industries, business and regional development.")
-    ]
-
-    for title, description in topics:
-        st.markdown(f"""
-        <div class="card">
-        <h4>{title}</h4>
-        <p>{description}</p>
-        </div>
-        """, unsafe_allow_html=True)
-
-    # TEAM
-    st.markdown("## 👥 Team Members")
-
-    cols = st.columns(2)
-
-    for i, member in enumerate(team_members):
-        with cols[i % 2]:
-            st.markdown(f"""
-            <div class="card">
-            <h3>👤 {member}</h3>
-            <p>Karnataka AI Chatbot Project Team</p>
-            </div>
-            """, unsafe_allow_html=True)
-
-    st.markdown("""
-    <div class="card">
-    <h4>🎓 Department</h4>
-    Computer Science and Engineering<br>
-    Shridevi Institute of Engineering and Technology
-    </div>
-    """, unsafe_allow_html=True)
+    st.session_state.messages.append({
+        "role": "assistant",
+        "content": answer
+    })
