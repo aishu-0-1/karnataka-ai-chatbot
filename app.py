@@ -23,12 +23,10 @@ if "messages" not in st.session_state:
 st.markdown("""
 <style>
 
-/* Main background */
 .stApp {
     background: linear-gradient(135deg, #faf3ff, #fff0f7, #edf7ff);
 }
 
-/* Sidebar */
 [data-testid="stSidebar"] {
     background: linear-gradient(180deg, #351254, #6634a5, #8a58c9);
 }
@@ -37,7 +35,6 @@ st.markdown("""
     color: white;
 }
 
-/* Main heading */
 .main-heading {
     text-align: center;
     font-size: 38px;
@@ -45,7 +42,6 @@ st.markdown("""
     color: #682d96;
 }
 
-/* Welcome section */
 .hero {
     background: linear-gradient(135deg, #f5ddff, #ffe5f3, #e3f4ff);
     padding: 30px 20px;
@@ -57,8 +53,8 @@ st.markdown("""
 
 .hero-subtitle {
     color: #b24894;
-    font-size: 19px;
-    font-weight: 600;
+    font-size: 23px;
+    font-weight: 700;
     font-style: italic;
 }
 
@@ -67,7 +63,6 @@ st.markdown("""
     font-size: 14px;
 }
 
-/* Topic cards */
 .topic-card {
     padding: 22px 12px;
     border-radius: 20px;
@@ -113,14 +108,9 @@ st.markdown("""
     color: #2d70a7;
 }
 
-/* Chat area */
 .chat-heading {
     color: #6d3198;
     font-weight: 800;
-}
-
-div[data-testid="stChatInput"] {
-    border-radius: 18px;
 }
 
 </style>
@@ -171,7 +161,7 @@ Identify the requested topic.
 Retrieve the matching district information.
 
 **7. 🤖 Answer Preparation**  
-Prepare a relevant answer using retrieved content.
+Prepare an answer using retrieved information.
 
 **8. 💬 Chatbot Response**  
 Display the answer to the user.
@@ -186,8 +176,8 @@ Display the answer to the user.
 Karnataka AI Chatbot is an interactive knowledge assistant
 that provides district-based information about Karnataka.
 
-Users can ask questions and explore the history, geography,
-culture, tourism, economy and development of Karnataka.
+Users can explore history, geography, culture, tourism,
+economy and development through simple questions.
 """)
 
         st.markdown("---")
@@ -228,6 +218,7 @@ Agriculture, industries and regional development.
             st.markdown(f"**{number}. 👤 {member}**")
 
         st.markdown("---")
+
         st.markdown("### 💻 Technologies Used")
 
         st.markdown("""
@@ -253,20 +244,15 @@ Agriculture, industries and regional development.
 # MAIN HOME PAGE
 # ==================================================
 
-# Main title
 st.markdown("""
 <div class="main-heading">
 🌿 Karnataka AI Chatbot
 </div>
 """, unsafe_allow_html=True)
 
-# Welcome banner
+# WELCOME BANNER (UPDATED)
 st.markdown("""
 <div class="hero">
-    <div style="font-size:18px; font-weight:800; color:#74329d;">
-        🌿 Karnataka AI Chatbot
-    </div>
-
     <div class="hero-subtitle">
         Your Karnataka Knowledge Assistant
     </div>
@@ -274,19 +260,19 @@ st.markdown("""
     <br>
 
     <div class="hero-description">
-        Explore Karnataka through History, Geography, Culture & Tourism,
-        and Economy & Development.
+        Explore Karnataka's 31 districts through history, geography,
+        culture, tourism, economy and development.
     </div>
 </div>
 """, unsafe_allow_html=True)
 
-# Topic heading
+# EXPLORE TOPICS
 st.markdown(
     "<h3 style='text-align:center;color:#8a48b5;'>✨ Explore Topics ✨</h3>",
     unsafe_allow_html=True
 )
 
-# Topic cards
+# TOPIC CARDS
 col1, col2, col3, col4 = st.columns(4)
 
 with col1:
@@ -325,7 +311,9 @@ with col4:
     </div>
     """, unsafe_allow_html=True)
 
-# Chat section
+# ==================================================
+# CHAT AREA
+# ==================================================
 st.markdown("---")
 
 st.markdown(
@@ -335,17 +323,16 @@ st.markdown(
 
 st.caption("Ask a question about any of Karnataka's 31 districts.")
 
-# Display chat history
+# DISPLAY CHAT HISTORY
 for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
 
-# User question
+# CHAT INPUT
 question = st.chat_input("Ask about Karnataka districts...")
 
 if question:
 
-    # Add user question to history
     st.session_state.messages.append({
         "role": "user",
         "content": question
@@ -354,7 +341,6 @@ if question:
     with st.chat_message("user"):
         st.markdown(question)
 
-    # Generate answer
     with st.chat_message("assistant"):
 
         with st.spinner("🌿 Exploring Karnataka information..."):
@@ -367,7 +353,6 @@ if question:
 
         st.markdown(answer)
 
-    # Save answer
     st.session_state.messages.append({
         "role": "assistant",
         "content": answer
